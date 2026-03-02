@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NordBank — Panga Süsteem</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">Nord<span>Bank</span></div>
+  <div class="header-status">
+    <div class="dot"></div>
+    Süsteem aktiivne
+  </div>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="nav-section">Ülevaade</div>
+    <button class="nav-btn active" onclick="showPage('dashboard')">
+      <span class="nav-icon"></span> Dashboard
+    </button>
+
+    <div class="nav-section">Kliendid</div>
+    <button class="nav-btn" onclick="showPage('clients')">
+      <span class="nav-icon"></span> Kliendid
+    </button>
+    <button class="nav-btn" onclick="showPage('add-client')">
+      <span class="nav-icon"></span> Lisa klient
+    </button>
+
+    <div class="nav-section">Kontod</div>
+    <button class="nav-btn" onclick="showPage('accounts')">
+      <span class="nav-icon"></span> Kontod
+    </button>
+    <button class="nav-btn" onclick="showPage('add-account')">
+      <span class="nav-icon"></span> Ava konto
+    </button>
+
+    <div class="nav-section">Tehingud</div>
+    <button class="nav-btn" onclick="showPage('transfer')">
+      <span class="nav-icon"></span> Ülekan
+    </button>
+    <button class="nav-btn" onclick="showPage('deposit')">
+      <span class="nav-icon"></span> Sissemaks
+    </button>
+    <button class="nav-btn" onclick="showPage('withdraw')">
+      <span class="nav-icon"></span> Väljavõtt
+    </button>
+    <button class="nav-btn" onclick="showPage('history')">
+      <span class="nav-icon"></span> Ajalugu
+    </button>
+
+    <div class="nav-section">Laenud</div>
+    <button class="nav-btn" onclick="showPage('loans')">
+      <span class="nav-icon"></span> Laenud
+    </button>
+    <button class="nav-btn" onclick="showPage('new-loan')">
+      <span class="nav-icon"></span> Uus laen
+    </button>
+    <button class="nav-btn" onclick="showPage('loan-payment')">
+      <span class="nav-icon"></span> Laenu maks
+    </button>
+
+    <div class="nav-section">SQL</div>
+    <button class="nav-btn" onclick="showPage('sql-view')">
+      <span class="nav-icon"></span> SQL konsoool
+    </button>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Panga süsteemi ülevaade</div>
+      <div class="grid-4" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Kliente</div><div class="stat-value green" id="stat-clients">0</div></div>
+        <div class="stat-card"><div class="stat-label">Kontosid</div><div class="stat-value blue" id="stat-accounts">0</div></div>
+        <div class="stat-card"><div class="stat-label">Tehinguid</div><div class="stat-value" id="stat-txns">0</div></div>
+        <div class="stat-card"><div class="stat-label">Aktiivseid laene</div><div class="stat-value warn" id="stat-loans">0</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Viimased tehingud</div>
+          <div class="table-wrap">
+            <table id="recent-txns">
+              <thead><tr><th>Konto</th><th>Tüüp</th><th>Summa</th><th>Kuupäev</th></tr></thead>
+              <tbody id="recent-txns-body"><tr><td colspan="4" class="empty">Tehinguid pole</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Kontode saldod</div>
+          <div id="account-cards-mini"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ KLIENDID ══ -->
+    <div id="page-clients" class="page">
+      <div class="page-title">Kliendid</div>
+      <div class="page-sub">Kõik registreeritud kliendid</div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Nimi</th><th>Isikukood</th><th>Email</th><th>Telefon</th><th>Konto</th></tr></thead>
+            <tbody id="clients-table-body"><tr><td colspan="6" class="empty">Kliente pole</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LISA KLIENT ══ -->
+    <div id="page-add-client" class="page">
+      <div class="page-title">Lisa klient</div>
+      <div class="page-sub">Uue kliendi registreerimine</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Kliendi andmed</div>
+          <div class="form-group"><label class="form-label">Eesnimi</label><input class="form-input" id="ac-eesnimi" placeholder="Aleks"></div>
+          <div class="form-group"><label class="form-label">Perenimi</label><input class="form-input" id="ac-perenimi" placeholder="Rohtla"></div>
+          <div class="form-group"><label class="form-label">Isikukood</label><input class="form-input" id="ac-isikukood" placeholder="49001011234"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ac-email" type="email" placeholder="aleks@email.ee"></div>
+          <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="ac-telefon" placeholder="+372 5000 0001"></div>
+          <div class="form-group"><label class="form-label">Aadress</label><input class="form-input" id="ac-aadress" placeholder="Tartu, Eesti"></div>
+          <button class="btn btn-primary" onclick="addClient()">Lisa klient</button>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Genereeritud SQL</div>
+            <div id="add-client-sql" class="sql-panel">
+              <div class="sql-header"><span>T-SQL</span><span>SQL Server</span></div>
+              <div class="sql-code" id="add-client-sql-code">-- Täida vorm SQL nägemiseks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ KONTOD ══ -->
+    <div id="page-accounts" class="page">
+      <div class="page-title">Kontod</div>
+      <div class="page-sub">Kõik pangakontod</div>
+      <div id="accounts-grid" class="grid-3"></div>
+    </div>
+
+    <!-- ══ AVA KONTO ══ -->
+    <div id="page-add-account" class="page">
+      <div class="page-title">Ava konto</div>
+      <div class="page-sub">Uue konto avamine kliendile</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Konto andmed</div>
+          <div class="form-group">
+            <label class="form-label">Klient</label>
+            <select class="form-select" id="aa-klient"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Konto tüüp</label>
+            <select class="form-select" id="aa-type">
+              <option value="ARVELDUS">Arvelduskonto</option>
+              <option value="HOIUS">Hoiukonto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Valuuta</label>
+            <select class="form-select" id="aa-currency">
+              <option value="EUR">EUR — Euro</option>
+              <option value="USD">USD — Dollar</option>
+              <option value="GBP">GBP — Naelsterling</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addAccount()">Ava konto</button>
+        </div>
+        <div class="card">
+          <div class="card-title">SQL</div>
+          <div class="sql-panel">
+            <div class="sql-header"><span>T-SQL</span><span>SQL Server</span></div>
+            <div class="sql-code" id="add-account-sql-code">EXEC dbo.sp_AvaKonto
+  @KlientID   = ?,
+  @KontoTüüp  = 'ARVELDUS',
+  @Valuuta    = 'EUR',
+  @KontoID    = @out OUTPUT;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ÜLEKANNE ══ -->
+    <div id="page-transfer" class="page">
+      <div class="page-title">Ülekanne</div>
+      <div class="page-sub">Raha ülekandmine kahe konto vahel</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Saatja konto</label>
+            <select class="form-select" id="tr-from" onchange="updateTransferSQL()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Saaja konto</label>
+            <select class="form-select" id="tr-to" onchange="updateTransferSQL()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Summa (€)</label>
+            <input class="form-input" id="tr-summa" type="number" min="0.01" step="0.01" placeholder="0.00" oninput="updateTransferSQL()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Selgitus</label>
+            <input class="form-input" id="tr-selgitus" placeholder="Makse eest..." oninput="updateTransferSQL()">
+          </div>
+          <button class="btn btn-primary" onclick="doTransfer()">Teosta ülekan</button>
+        </div>
+        <div class="card">
+          <div class="card-title">SQL</div>
+          <div class="sql-panel">
+            <div class="sql-header"><span>T-SQL</span><span>Transaktsiooniga</span></div>
+            <div class="sql-code" id="transfer-sql-code">-- Vali kontod ja summa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SISSEMAKS ══ -->
+    <div id="page-deposit" class="page">
+      <div class="page-title">Sissemaks</div>
+      <div class="page-sub">Raha lisamine kontole</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="form-group"><label class="form-label">Konto</label><select class="form-select" id="dep-konto" onchange="updateDepositSQL()"></select></div>
+          <div class="form-group"><label class="form-label">Summa (€)</label><input class="form-input" id="dep-summa" type="number" min="0.01" step="0.01" placeholder="0.00" oninput="updateDepositSQL()"></div>
+          <div class="form-group"><label class="form-label">Kirjeldus</label><input class="form-input" id="dep-kirjeldus" placeholder="Sissemaks" oninput="updateDepositSQL()"></div>
+          <button class="btn btn-primary" onclick="doDeposit()">Tee sissemaks</button>
+        </div>
+        <div class="card">
+          <div class="card-title">SQL</div>
+          <div class="sql-panel">
+            <div class="sql-header"><span>T-SQL</span></div>
+            <div class="sql-code" id="deposit-sql-code">-- Vali konto ja summa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VÄLJAVÕTT ══ -->
+    <div id="page-withdraw" class="page">
+      <div class="page-title">Väljavõtt</div>
+      <div class="page-sub">Raha väljavõtmine kontolt</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="form-group"><label class="form-label">Konto</label><select class="form-select" id="wd-konto" onchange="updateWithdrawSQL()"></select></div>
+          <div class="form-group"><label class="form-label">Summa (€)</label><input class="form-input" id="wd-summa" type="number" min="0.01" step="0.01" placeholder="0.00" oninput="updateWithdrawSQL()"></div>
+          <div class="form-group"><label class="form-label">Kirjeldus</label><input class="form-input" id="wd-kirjeldus" placeholder="Väljavõtt" oninput="updateWithdrawSQL()"></div>
+          <button class="btn btn-danger" onclick="doWithdraw()">Tee väljavõtt</button>
+        </div>
+        <div class="card">
+          <div class="card-title">SQL</div>
+          <div class="sql-panel">
+            <div class="sql-header"><span>T-SQL</span></div>
+            <div class="sql-code" id="withdraw-sql-code">-- Vali konto ja summa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AJALUGU ══ -->
+    <div id="page-history" class="page">
+      <div class="page-title">Tehingute ajalugu</div>
+      <div class="page-sub">Kõik teostatud tehingud</div>
+      <div class="card">
+        <div class="flex-row" style="margin-bottom:16px">
+          <div class="form-group" style="flex:2"><label class="form-label">Konto filter</label><select class="form-select" id="hist-konto-filter" onchange="renderHistory()"><option value="">Kõik kontod</option></select></div>
+          <div class="form-group"><label class="form-label">Tüüp</label><select class="form-select" id="hist-type-filter" onchange="renderHistory()"><option value="">Kõik</option><option>KREDIT</option><option>DEEBET</option><option>ÜLEKAN_SISSE</option><option>ÜLEKAN_VÄLJA</option><option>LAEN_VÄLJA</option><option>LAEN_TAGASI</option></select></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Konto</th><th>Tüüp</th><th>Summa</th><th>Saldo pärast</th><th>Kirjeldus</th><th>Kuupäev</th></tr></thead>
+            <tbody id="history-table-body"><tr><td colspan="7" class="empty">Tehinguid pole</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LAENUD ══ -->
+    <div id="page-loans" class="page">
+      <div class="page-title">Laenud</div>
+      <div class="page-sub">Aktiivsed ja lõpetatud laenud</div>
+      <div id="loans-list"></div>
+    </div>
+
+    <!-- ══ UUS LAEN ══ -->
+    <div id="page-new-loan" class="page">
+      <div class="page-title">Uus laen</div>
+      <div class="page-sub">Annuiteetlaenu väljastamine</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="form-group"><label class="form-label">Klient</label><select class="form-select" id="nl-klient" onchange="calcLoan()"></select></div>
+          <div class="form-group"><label class="form-label">Summa (€)</label><input class="form-input" id="nl-summa" type="number" min="100" placeholder="10000" oninput="calcLoan()"></div>
+          <div class="form-group"><label class="form-label">Intressimäär aastas (%)</label><input class="form-input" id="nl-intress" type="number" min="0" max="100" step="0.1" placeholder="5.0" oninput="calcLoan()"></div>
+          <div class="form-group"><label class="form-label">Tähtaeg (kuudes)</label><input class="form-input" id="nl-tahtaeg" type="number" min="1" max="360" placeholder="12" oninput="calcLoan()"></div>
+          <div id="loan-preview" style="display:none" class="stat-card" style="margin-bottom:16px">
+            <div class="stat-label">Kuumaks</div>
+            <div class="stat-value blue" id="loan-monthly">—</div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:8px" onclick="doNewLoan()">Väljasta laen</button>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">SQL</div>
+            <div class="sql-panel">
+              <div class="sql-header"><span>T-SQL</span></div>
+              <div class="sql-code" id="new-loan-sql">-- Täida vorm</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-title">Maksegraafik (eelvaade)</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Põhiosa</th><th>Intress</th><th>Kokku</th><th>Jäänuk</th></tr></thead>
+                <tbody id="loan-schedule-preview"><tr><td colspan="5" style="color:var(--muted);padding:12px">Täida vorm eelvaate jaoks</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LAENU MAKS ══ -->
+    <div id="page-loan-payment" class="page">
+      <div class="page-title">Laenu tagasimaksmine</div>
+      <div class="page-sub">Järgmise kuumakse sooritamine</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="form-group"><label class="form-label">Laen</label><select class="form-select" id="lp-laen" onchange="updateLoanPaySQL()"></select></div>
+          <div class="form-group"><label class="form-label">Arvelduskonto (kust makstakse)</label><select class="form-select" id="lp-konto" onchange="updateLoanPaySQL()"></select></div>
+          <div id="lp-info" style="color:var(--muted);font-size:0.78rem;margin-bottom:16px">—</div>
+          <button class="btn btn-primary" onclick="doLoanPayment()">Soorita maks</button>
+        </div>
+        <div class="card">
+          <div class="card-title">SQL</div>
+          <div class="sql-panel">
+            <div class="sql-header"><span>T-SQL</span></div>
+            <div class="sql-code" id="loan-pay-sql">-- Vali laen ja konto</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SQL KONSOOL ══ -->
+    <div id="page-sql-view" class="page">
+      <div class="page-title">SQL Konsool</div>
+      <div class="page-sub">Vaata kõiki genereeritud SQL-lauseid</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span style="font-size:0.78rem;color:var(--muted)" id="sql-log-count">0 lauset</span>
+          <button class="btn btn-secondary btn-sm" onclick="clearSQLLog()">Tühjenda</button>
+        </div>
+        <div id="sql-log-list"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
