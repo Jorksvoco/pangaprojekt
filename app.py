@@ -1,9 +1,6 @@
-# ═══════════════════════════════════════════════
 # NordBank — Flask Backend
 # Käivita: python app.py
 # Ava brauseris: http://localhost:5000
-# ═══════════════════════════════════════════════
-
 from flask import Flask, jsonify, request, send_from_directory
 
 from database import db
@@ -50,11 +47,8 @@ def index():
     return send_from_directory("static", "index.html")
 
 
-# ═══════════════════════════════════════════════
+
 # KLIENDID
-# ═══════════════════════════════════════════════
-
-
 @app.route("/api/kliendid", methods=["GET"])
 def get_kliendid():
     """Tagasta kõik kliendid"""
@@ -131,11 +125,7 @@ def uuenda_klient(kid):
     return jsonify({"teade": f"Klient {tegevus}"})
 
 
-# ═══════════════════════════════════════════════
 # KONTOD
-# ═══════════════════════════════════════════════
-
-
 @app.route("/api/kontod", methods=["GET"])
 def get_kontod():
     """Tagasta kõik kontod koos klientide nimedega"""
@@ -195,11 +185,8 @@ def sulge_konto(kid):
     return jsonify({"teade": "Konto suletud"})
 
 
-# ═══════════════════════════════════════════════
+
 # TEHINGUD
-# ═══════════════════════════════════════════════
-
-
 @app.route("/api/tehingud", methods=["GET"])
 def get_tehingud():
     """Tagasta tehingud filtritega"""
@@ -339,9 +326,7 @@ def ylekan():
 
 # ═══════════════════════════════════════════════
 # LAENUD
-# ═══════════════════════════════════════════════
-
-
+# ═════════════════════════════════════════════
 @app.route("/api/laenud", methods=["GET"])
 def get_laenud():
     """Tagasta kõik laenud koos maksegraafikuga"""
@@ -536,8 +521,7 @@ def rakenda_intress():
 
 # ═══════════════════════════════════════════════
 # SQL LOGI
-# ═══════════════════════════════════════════════
-
+# ══════════════════════════════════════════════
 
 @app.route("/api/sql-logi", methods=["GET"])
 def get_sql_logi():
@@ -550,11 +534,7 @@ def clear_sql_logi():
     return jsonify({"teade": "Logi tühjendatud"})
 
 
-# ═══════════════════════════════════════════════
 # STATISTIKA (dashboard)
-# ═══════════════════════════════════════════════
-
-
 @app.route("/api/statistika", methods=["GET"])
 def statistika():
     def _count(sql):
@@ -573,9 +553,8 @@ def statistika():
     )
 
 
-# ═══════════════════════════════════════════════
+
 # KÄIVITAMINE
-# ═══════════════════════════════════════════════
 if __name__ == "__main__":
     db.init()  # Loo tabelid
     db.seed()  # Lisa näidisandmed (ainult esimesel korral)
