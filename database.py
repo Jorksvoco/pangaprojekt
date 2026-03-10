@@ -1,4 +1,4 @@
-# NordBank — SQLite andmebaas
+﻿# NordBank — SQLite andmebaas
 
 import sqlite3
 
@@ -182,4 +182,3 @@ class Database:
 
 # Globaalne objekt — imporditakse app.py-sse
 db = Database()
-
