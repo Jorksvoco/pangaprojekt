@@ -1,0 +1,2096 @@
+﻿<!doctype html>
+<html lang="et">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NordBank — Panga süsteem</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #0b0f12;
+                --bg-elev: #12181d;
+                --panel: rgba(18, 24, 29, 0.86);
+                --panel-strong: #151c22;
+                --stroke: rgba(255, 255, 255, 0.08);
+                --text: #e8f0f7;
+                --muted: #9aa6b2;
+                --accent: #ff9f1c;
+                --accent-2: #2ec4b6;
+                --danger: #ff5d5d;
+                --success: #69db7c;
+                --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                font-family:
+                    "Space Grotesk",
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    sans-serif;
+                color: var(--text);
+                background:
+                    radial-gradient(
+                        1200px 600px at 80% -10%,
+                        rgba(46, 196, 182, 0.14),
+                        transparent 60%
+                    ),
+                    radial-gradient(
+                        900px 500px at 10% 20%,
+                        rgba(255, 159, 28, 0.12),
+                        transparent 55%
+                    ),
+                    linear-gradient(180deg, #0a0f12 0%, #0f151a 100%);
+            }
+
+            .app-shell {
+                display: grid;
+                grid-template-rows: auto 1fr;
+                min-height: 100vh;
+            }
+
+            .topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 18px 28px;
+                border-bottom: 1px solid var(--stroke);
+                backdrop-filter: blur(14px);
+            }
+
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-family: "Fraunces", serif;
+                font-size: 1.35rem;
+                letter-spacing: 0.2px;
+            }
+
+            .brand span {
+                color: var(--accent);
+                font-weight: 700;
+            }
+
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 14px;
+                border-radius: 999px;
+                background: rgba(46, 196, 182, 0.1);
+                color: var(--accent-2);
+                font-size: 0.85rem;
+            }
+
+            .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--accent-2);
+                box-shadow: 0 0 12px rgba(46, 196, 182, 0.6);
+            }
+
+            .layout {
+                display: grid;
+                grid-template-columns: 260px 1fr;
+                gap: 24px;
+                padding: 24px;
+            }
+
+            .sidebar {
+                position: sticky;
+                top: 24px;
+                align-self: start;
+                background: var(--panel);
+                border: 1px solid var(--stroke);
+                border-radius: 22px;
+                padding: 20px;
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(20px);
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-group {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-title {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.2em;
+                color: var(--muted);
+                margin-top: 4px;
+            }
+
+            .nav-btn {
+                border: 1px solid transparent;
+                background: transparent;
+                color: var(--text);
+                padding: 10px 12px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                font-size: 0.95rem;
+                transition: all 0.2s ease;
+            }
+
+            .nav-btn:hover {
+                background: rgba(255, 255, 255, 0.04);
+                border-color: var(--stroke);
+            }
+
+            .nav-btn.active {
+                background: rgba(255, 159, 28, 0.15);
+                border-color: rgba(255, 159, 28, 0.4);
+                color: var(--accent);
+            }
+
+            .nav-icon {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: currentColor;
+                opacity: 0.7;
+            }
+
+            .content {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .page {
+                display: none;
+                animation: fadeUp 0.4s ease forwards;
+            }
+
+            .page.active {
+                display: block;
+            }
+
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .page-title {
+                font-family: "Fraunces", serif;
+                font-size: 2rem;
+                margin: 0 0 6px;
+            }
+
+            .page-sub {
+                color: var(--muted);
+                margin-bottom: 18px;
+            }
+
+            .grid-4,
+            .grid-3,
+            .grid-2 {
+                display: grid;
+                gap: 16px;
+            }
+
+            .grid-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .grid-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .grid-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .card,
+            .stat-card {
+                background: var(--panel);
+                border: 1px solid var(--stroke);
+                border-radius: 20px;
+                padding: 18px;
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(18px);
+            }
+
+            .stat-card {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .stat-label {
+                font-size: 0.85rem;
+                color: var(--muted);
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+            }
+
+            .stat-value.green {
+                color: var(--success);
+            }
+
+            .stat-value.blue {
+                color: var(--accent-2);
+            }
+
+            .stat-value.warn {
+                color: var(--accent);
+            }
+
+            .card-title {
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+
+            .table-wrap {
+                overflow: auto;
+                border-radius: 14px;
+                border: 1px solid var(--stroke);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.9rem;
+            }
+
+            thead {
+                background: rgba(255, 255, 255, 0.03);
+                text-align: left;
+                color: var(--muted);
+            }
+
+            th,
+            td {
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--stroke);
+            }
+
+            tbody tr:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            .empty {
+                text-align: center;
+                color: var(--muted);
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .form-label {
+                font-size: 0.85rem;
+                color: var(--muted);
+            }
+
+            .form-input,
+            .form-select,
+            .form-textarea {
+                padding: 10px 12px;
+                background: rgba(8, 10, 12, 0.6);
+                border: 1px solid var(--stroke);
+                border-radius: 12px;
+                color: var(--text);
+                font-family: "Space Grotesk", sans-serif;
+            }
+
+            .btn {
+                border: none;
+                border-radius: 12px;
+                padding: 10px 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition:
+                    transform 0.15s ease,
+                    box-shadow 0.2s ease;
+            }
+
+            .btn:active {
+                transform: translateY(1px);
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #ff9f1c, #ffbf69);
+                color: #1a1206;
+                box-shadow: 0 10px 30px rgba(255, 159, 28, 0.35);
+            }
+
+            .btn-secondary {
+                background: rgba(255, 255, 255, 0.08);
+                color: var(--text);
+                border: 1px solid var(--stroke);
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #ff5d5d, #ff8f8f);
+                color: #1b0b0b;
+            }
+
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .sql-panel {
+                background: rgba(9, 12, 16, 0.8);
+                border: 1px solid var(--stroke);
+                border-radius: 14px;
+                padding: 14px;
+            }
+
+            .sql-header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.75rem;
+                color: var(--muted);
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+            }
+
+            .sql-code {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 0.78rem;
+                line-height: 1.5;
+                white-space: pre-wrap;
+            }
+
+            .mini-account {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: 1px solid var(--stroke);
+                margin-bottom: 10px;
+            }
+
+            .loan-card {
+                border: 1px solid var(--stroke);
+                border-radius: 18px;
+                padding: 16px;
+                background: rgba(10, 14, 18, 0.7);
+                margin-bottom: 16px;
+            }
+
+            .pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 0.75rem;
+                border: 1px solid var(--stroke);
+                color: var(--muted);
+            }
+
+            .stack {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            #toast {
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: rgba(15, 20, 25, 0.92);
+                border: 1px solid var(--stroke);
+                color: var(--text);
+                padding: 12px 16px;
+                border-radius: 12px;
+                box-shadow: var(--shadow);
+                opacity: 0;
+                transform: translateY(8px);
+                transition:
+                    opacity 0.2s ease,
+                    transform 0.2s ease;
+                z-index: 999;
+            }
+
+            #toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            @media (max-width: 1100px) {
+                .layout {
+                    grid-template-columns: 1fr;
+                }
+
+                .sidebar {
+                    position: relative;
+                    top: 0;
+                }
+
+                .grid-4 {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .grid-3 {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+
+            @media (max-width: 760px) {
+                .topbar {
+                    flex-direction: column;
+                    gap: 10px;
+                    align-items: flex-start;
+                }
+
+                .grid-4,
+                .grid-3,
+                .grid-2 {
+                    grid-template-columns: 1fr;
+                }
+
+                .layout {
+                    padding: 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app-shell">
+            <header class="topbar">
+                <div class="brand">Nord<span>Bank</span></div>
+                <div class="status">
+                    <span class="dot"></span> Süsteem aktiivne
+                </div>
+            </header>
+
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="nav-group">
+                        <div class="nav-title">Ülevaade</div>
+                        <button class="nav-btn active" data-page="dashboard">
+                            <span class="nav-icon"></span>Dashboard
+                        </button>
+                    </div>
+                    <div class="nav-group">
+                        <div class="nav-title">Kliendid</div>
+                        <button class="nav-btn" data-page="clients">
+                            <span class="nav-icon"></span>Kliendid
+                        </button>
+                        <button class="nav-btn" data-page="add-client">
+                            <span class="nav-icon"></span>Lisa klient
+                        </button>
+                    </div>
+                    <div class="nav-group">
+                        <div class="nav-title">Kontod</div>
+                        <button class="nav-btn" data-page="accounts">
+                            <span class="nav-icon"></span>Kontod
+                        </button>
+                        <button class="nav-btn" data-page="add-account">
+                            <span class="nav-icon"></span>Ava konto
+                        </button>
+                    </div>
+                    <div class="nav-group">
+                        <div class="nav-title">Tehingud</div>
+                        <button class="nav-btn" data-page="transfer">
+                            <span class="nav-icon"></span>Ülekanne
+                        </button>
+                        <button class="nav-btn" data-page="deposit">
+                            <span class="nav-icon"></span>Sissemaks
+                        </button>
+                        <button class="nav-btn" data-page="withdraw">
+                            <span class="nav-icon"></span>Väljavõtt
+                        </button>
+                        <button class="nav-btn" data-page="history">
+                            <span class="nav-icon"></span>Ajalugu
+                        </button>
+                    </div>
+                    <div class="nav-group">
+                        <div class="nav-title">Laenud</div>
+                        <button class="nav-btn" data-page="loans">
+                            <span class="nav-icon"></span>Laenud
+                        </button>
+                        <button class="nav-btn" data-page="new-loan">
+                            <span class="nav-icon"></span>Uus laen
+                        </button>
+                        <button class="nav-btn" data-page="loan-payment">
+                            <span class="nav-icon"></span>Laenu maks
+                        </button>
+                    </div>
+                    <div class="nav-group">
+                        <div class="nav-title">SQL</div>
+                        <button class="nav-btn" data-page="sql-view">
+                            <span class="nav-icon"></span>SQL konsool
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="content">
+                    <section id="page-dashboard" class="page active">
+                        <div class="page-title">Dashboard</div>
+                        <div class="page-sub">Panga süsteemi ülevaade</div>
+                        <div class="grid-4" id="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Kliente</div>
+                                <div class="stat-value green" id="stat-clients">
+                                    0
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Kontosid</div>
+                                <div class="stat-value blue" id="stat-accounts">
+                                    0
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Tehinguid</div>
+                                <div class="stat-value" id="stat-txns">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Aktiivseid laene</div>
+                                <div class="stat-value warn" id="stat-loans">
+                                    0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-title">Viimased tehingud</div>
+                                <div class="table-wrap">
+                                    <table id="recent-txns">
+                                        <thead>
+                                            <tr>
+                                                <th>Konto</th>
+                                                <th>Tüüp</th>
+                                                <th>Summa</th>
+                                                <th>Kuupäev</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-txns-body">
+                                            <tr>
+                                                <td colspan="4" class="empty">
+                                                    Tehinguid pole
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Kontode saldod</div>
+                                <div id="account-cards-mini"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-clients" class="page">
+                        <div class="page-title">Kliendid</div>
+                        <div class="page-sub">Kõik registreeritud kliendid</div>
+                        <div class="card">
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nimi</th>
+                                            <th>Isikukood</th>
+                                            <th>Email</th>
+                                            <th>Telefon</th>
+                                            <th>Konto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clients-table-body">
+                                        <tr>
+                                            <td colspan="6" class="empty">
+                                                Kliente pole
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-add-client" class="page">
+                        <div class="page-title">Lisa klient</div>
+                        <div class="page-sub">Uue kliendi registreerimine</div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-title">Kliendi andmed</div>
+                                <div class="form-group">
+                                    <label class="form-label">Eesnimi</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-eesnimi"
+                                        placeholder="Aleks"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Perenimi</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-perenimi"
+                                        placeholder="Rohtla"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Isikukood</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-isikukood"
+                                        placeholder="49001011234"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-email"
+                                        type="email"
+                                        placeholder="aleks@email.ee"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Telefon</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-telefon"
+                                        placeholder="+372 5000 0001"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Aadress</label>
+                                    <input
+                                        class="form-input"
+                                        id="ac-aadress"
+                                        placeholder="Tartu, Eesti"
+                                    />
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-add-client"
+                                >
+                                    Lisa klient
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Genereeritud SQL</div>
+                                <div id="add-client-sql" class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span
+                                        ><span>SQL Server</span>
+                                    </div>
+                                    <div
+                                        class="sql-code"
+                                        id="add-client-sql-code"
+                                    >
+                                        -- Täida vorm SQL nägemiseks
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-accounts" class="page">
+                        <div class="page-title">Kontod</div>
+                        <div class="page-sub">Kõik pangakontod</div>
+                        <div id="accounts-grid" class="grid-3"></div>
+                    </section>
+
+                    <section id="page-add-account" class="page">
+                        <div class="page-title">Ava konto</div>
+                        <div class="page-sub">Uue konto avamine kliendile</div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-title">Konto andmed</div>
+                                <div class="form-group">
+                                    <label class="form-label">Klient</label>
+                                    <select
+                                        class="form-select"
+                                        id="aa-klient"
+                                    ></select>
+                                </div>
+                                <div id="aa-new-client" style="display: none">
+                                    <div class="card-title">
+                                        Uue kliendi andmed
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Eesnimi</label
+                                        >
+                                        <input
+                                            class="form-input"
+                                            id="aa-eesnimi"
+                                            placeholder="Mari"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Perenimi</label
+                                        >
+                                        <input
+                                            class="form-input"
+                                            id="aa-perenimi"
+                                            placeholder="Tamm"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Isikukood</label
+                                        >
+                                        <input
+                                            class="form-input"
+                                            id="aa-isikukood"
+                                            placeholder="49001011234"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Email</label>
+                                        <input
+                                            class="form-input"
+                                            id="aa-email"
+                                            type="email"
+                                            placeholder="mari@email.ee"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Telefon</label
+                                        >
+                                        <input
+                                            class="form-input"
+                                            id="aa-telefon"
+                                            placeholder="+372 5000 0003"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Aadress</label
+                                        >
+                                        <input
+                                            class="form-input"
+                                            id="aa-aadress"
+                                            placeholder="Tallinn, Eesti"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Konto tüüp</label>
+                                    <select class="form-select" id="aa-type">
+                                        <option value="ARVELDUS">
+                                            Arvelduskonto
+                                        </option>
+                                        <option value="HOIUS">Hoiukonto</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Valuuta</label>
+                                    <select
+                                        class="form-select"
+                                        id="aa-currency"
+                                    >
+                                        <option value="EUR">EUR — Euro</option>
+                                        <option value="USD">
+                                            USD — Dollar
+                                        </option>
+                                        <option value="GBP">
+                                            GBP — Naelsterling
+                                        </option>
+                                    </select>
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-add-account"
+                                >
+                                    Ava konto
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">SQL</div>
+                                <div class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span
+                                        ><span>SQL Server</span>
+                                    </div>
+                                    <div
+                                        class="sql-code"
+                                        id="add-account-sql-code"
+                                    >
+                                        EXEC dbo.sp_AvaKonto @KlientID=?,
+                                        @KontoTüüp='ARVELDUS', @Valuuta='EUR',
+                                        @KontoID=@out OUTPUT;
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-transfer" class="page">
+                        <div class="page-title">Ülekanne</div>
+                        <div class="page-sub">
+                            Raha ülekandmine kahe konto vahel
+                        </div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Saatja konto</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="tr-from"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Saaja konto</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="tr-to"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Summa (‚¬)</label>
+                                    <input
+                                        class="form-input"
+                                        id="tr-summa"
+                                        type="number"
+                                        min="0.01"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Selgitus</label>
+                                    <input
+                                        class="form-input"
+                                        id="tr-selgitus"
+                                        placeholder="Makse eest..."
+                                    />
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-transfer"
+                                >
+                                    Teosta ülekanne
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">SQL</div>
+                                <div class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span
+                                        ><span>Transaktsioon</span>
+                                    </div>
+                                    <div
+                                        class="sql-code"
+                                        id="transfer-sql-code"
+                                    >
+                                        -- Vali kontod ja summa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-deposit" class="page">
+                        <div class="page-title">Sissemaks</div>
+                        <div class="page-sub">Raha lisamine kontole</div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label class="form-label">Konto</label>
+                                    <select
+                                        class="form-select"
+                                        id="dep-konto"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Summa (‚¬)</label>
+                                    <input
+                                        class="form-input"
+                                        id="dep-summa"
+                                        type="number"
+                                        min="0.01"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Kirjeldus</label>
+                                    <input
+                                        class="form-input"
+                                        id="dep-kirjeldus"
+                                        placeholder="Sissemaks"
+                                    />
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-deposit"
+                                >
+                                    Tee sissemaks
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">SQL</div>
+                                <div class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span>
+                                    </div>
+                                    <div class="sql-code" id="deposit-sql-code">
+                                        -- Vali konto ja summa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-withdraw" class="page">
+                        <div class="page-title">Väljavõtt</div>
+                        <div class="page-sub">Raha väljavõtmine kontolt</div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label class="form-label">Konto</label>
+                                    <select
+                                        class="form-select"
+                                        id="wd-konto"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Summa (‚¬)</label>
+                                    <input
+                                        class="form-input"
+                                        id="wd-summa"
+                                        type="number"
+                                        min="0.01"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Kirjeldus</label>
+                                    <input
+                                        class="form-input"
+                                        id="wd-kirjeldus"
+                                        placeholder="Väljavõtt"
+                                    />
+                                </div>
+                                <button
+                                    class="btn btn-danger"
+                                    id="btn-withdraw"
+                                >
+                                    Tee väljavõtt
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">SQL</div>
+                                <div class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span>
+                                    </div>
+                                    <div
+                                        class="sql-code"
+                                        id="withdraw-sql-code"
+                                    >
+                                        -- Vali konto ja summa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-history" class="page">
+                        <div class="page-title">Tehingute ajalugu</div>
+                        <div class="page-sub">Kõik teostatud tehingud</div>
+                        <div class="card">
+                            <div class="grid-2" style="margin-bottom: 16px">
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Konto filter</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="hist-konto-filter"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tüüp</label>
+                                    <select
+                                        class="form-select"
+                                        id="hist-type-filter"
+                                    >
+                                        <option value="">Kõik</option>
+                                        <option>KREDIT</option>
+                                        <option>DEEBET</option>
+                                        <option>ÜLEKAN_SISSE</option>
+                                        <option>ÜLEKAN_VÄLJA</option>
+                                        <option>LAEN_VÄLJA</option>
+                                        <option>LAEN_TAGASI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Konto</th>
+                                            <th>Tüüp</th>
+                                            <th>Summa</th>
+                                            <th>Saldo pärast</th>
+                                            <th>Kirjeldus</th>
+                                            <th>Kuupäev</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr>
+                                            <td colspan="7" class="empty">
+                                                Tehinguid pole
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-loans" class="page">
+                        <div class="page-title">Laenud</div>
+                        <div class="page-sub">
+                            Aktiivsed ja lõpetatud laenud
+                        </div>
+                        <div id="loans-list"></div>
+                    </section>
+
+                    <section id="page-new-loan" class="page">
+                        <div class="page-title">Uus laen</div>
+                        <div class="page-sub">Annuiteetlaenu väljastamine</div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label class="form-label">Klient</label>
+                                    <select
+                                        class="form-select"
+                                        id="nl-klient"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Laekub kontole</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="nl-konto"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Summa (‚¬)</label>
+                                    <input
+                                        class="form-input"
+                                        id="nl-summa"
+                                        type="number"
+                                        min="100"
+                                        placeholder="10000"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Intressimäär aastas (%)</label
+                                    >
+                                    <input
+                                        class="form-input"
+                                        id="nl-intress"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
+                                        placeholder="5.0"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Tähtaeg (kuudes)</label
+                                    >
+                                    <input
+                                        class="form-input"
+                                        id="nl-tahtaeg"
+                                        type="number"
+                                        min="1"
+                                        max="360"
+                                        placeholder="12"
+                                    />
+                                </div>
+                                <div
+                                    id="loan-preview"
+                                    class="stat-card"
+                                    style="display: none; margin-bottom: 16px"
+                                >
+                                    <div class="stat-label">Kuumaks</div>
+                                    <div
+                                        class="stat-value blue"
+                                        id="loan-monthly"
+                                    >
+                                        —
+                                    </div>
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-new-loan"
+                                >
+                                    Väljasta laen
+                                </button>
+                            </div>
+                            <div class="stack">
+                                <div class="card">
+                                    <div class="card-title">SQL</div>
+                                    <div class="sql-panel">
+                                        <div class="sql-header">
+                                            <span>T-SQL</span>
+                                        </div>
+                                        <div class="sql-code" id="new-loan-sql">
+                                            -- Täida vorm
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-title">
+                                        Maksegraafik (eelvaade)
+                                    </div>
+                                    <div class="table-wrap">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Põhiosa</th>
+                                                    <th>Intress</th>
+                                                    <th>Kokku</th>
+                                                    <th>Jäänuk</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="loan-schedule-preview">
+                                                <tr>
+                                                    <td
+                                                        colspan="5"
+                                                        class="empty"
+                                                    >
+                                                        Täida vorm eelvaate
+                                                        jaoks
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-loan-payment" class="page">
+                        <div class="page-title">Laenu tagasimaksmine</div>
+                        <div class="page-sub">
+                            Järgmise kuumakse sooritamine
+                        </div>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label class="form-label">Laen</label>
+                                    <select
+                                        class="form-select"
+                                        id="lp-laen"
+                                    ></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"
+                                        >Arvelduskonto (kust makstakse)</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="lp-konto"
+                                    ></select>
+                                </div>
+                                <div
+                                    id="lp-info"
+                                    style="
+                                        color: var(--muted);
+                                        font-size: 0.85rem;
+                                        margin-bottom: 16px;
+                                    "
+                                >
+                                    —
+                                </div>
+                                <button
+                                    class="btn btn-primary"
+                                    id="btn-loan-pay"
+                                >
+                                    Soorita maks
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">SQL</div>
+                                <div class="sql-panel">
+                                    <div class="sql-header">
+                                        <span>T-SQL</span>
+                                    </div>
+                                    <div class="sql-code" id="loan-pay-sql">
+                                        -- Vali laen ja konto
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="page-sql-view" class="page">
+                        <div class="page-title">SQL konsool</div>
+                        <div class="page-sub">
+                            Vaata kõiki genereeritud SQL-lauseid
+                        </div>
+                        <div class="card">
+                            <div
+                                style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    margin-bottom: 16px;
+                                "
+                            >
+                                <span
+                                    style="
+                                        font-size: 0.8rem;
+                                        color: var(--muted);
+                                    "
+                                    id="sql-log-count"
+                                    >0 lauset</span
+                                >
+                                <button
+                                    class="btn btn-secondary btn-sm"
+                                    id="btn-clear-sql"
+                                >
+                                    Tühjenda
+                                </button>
+                            </div>
+                            <div id="sql-log-list"></div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+
+        <div id="toast"></div>
+
+        <script>
+            const state = {
+                clients: [],
+                accounts: [],
+                loans: [],
+                txns: [],
+                sqlLog: [],
+            };
+
+            const qs = (sel) => document.querySelector(sel);
+            const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+
+            function showToast(message, type = "info") {
+                const toast = qs("#toast");
+                toast.textContent = message;
+                toast.style.borderColor =
+                    type === "error"
+                        ? "rgba(255,93,93,0.6)"
+                        : "rgba(255,159,28,0.5)";
+                toast.classList.add("show");
+                setTimeout(() => toast.classList.remove("show"), 2600);
+            }
+
+            async function apiGet(path) {
+                const res = await fetch(path, { cache: "no-store" });
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }
+
+            async function apiSend(path, method, data) {
+                const res = await fetch(path, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: data ? JSON.stringify(data) : null,
+                });
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            }
+
+            const apiPost = (p, d) => apiSend(p, "POST", d);
+            const apiPatch = (p, d) => apiSend(p, "PATCH", d);
+            const apiDelete = (p) => apiSend(p, "DELETE");
+
+            function formatMoney(value) {
+                const n = Number(value || 0);
+                return `${n.toFixed(2)} ‚¬`;
+            }
+
+            function formatDate(value) {
+                if (!value) return "—";
+                const d = new Date(value.replace(" ", "T"));
+                if (Number.isNaN(d.getTime())) return value;
+                return d.toLocaleString("et-EE", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                });
+            }
+
+            function setActivePage(page) {
+                qsa(".page").forEach((p) => p.classList.remove("active"));
+                const target = qs(`#page-${page}`);
+                if (target) target.classList.add("active");
+                qsa(".nav-btn").forEach((btn) => {
+                    btn.classList.toggle("active", btn.dataset.page === page);
+                });
+                if (page === "accounts") {
+                    loadAll();
+                }
+            }
+
+            function bindNav() {
+                qsa(".nav-btn").forEach((btn) => {
+                    btn.addEventListener("click", () =>
+                        setActivePage(btn.dataset.page),
+                    );
+                });
+            }
+
+            function renderStats(stats) {
+                qs("#stat-clients").textContent = stats.kliendid || 0;
+                qs("#stat-accounts").textContent = stats.kontod || 0;
+                qs("#stat-txns").textContent = stats.tehingud || 0;
+                qs("#stat-loans").textContent = stats.laenud || 0;
+            }
+
+            function renderRecentTxns() {
+                const tbody = qs("#recent-txns-body");
+                const rows = state.txns.slice(0, 6);
+                if (!rows.length) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="4" class="empty">Tehinguid pole</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = rows
+                    .map(
+                        (t) => `
+                <tr>
+                  <td>${t.konto_nr || t.konto_id}</td>
+                  <td>${t.tyup}</td>
+                  <td>${formatMoney(t.summa)}</td>
+                  <td>${formatDate(t.kuupaev)}</td>
+                </tr>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderAccountMini() {
+                const wrap = qs("#account-cards-mini");
+                if (!state.accounts.length) {
+                    wrap.innerHTML = '<div class="empty">Kontosid pole</div>';
+                    return;
+                }
+                wrap.innerHTML = state.accounts
+                    .map(
+                        (a) => `
+                <div class="mini-account">
+                  <div>
+                    <div style="font-weight:600;">${a.nr}</div>
+                    <div style="color: var(--muted); font-size: 0.75rem;">${a.klient_nimi || "—"}</div>
+                    <div class="pill">${a.tyup}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-weight:600;">${formatMoney(a.saldo)}</div>
+                    <div style="color: var(--muted); font-size: 0.75rem;">${a.valuuta}</div>
+                  </div>
+                </div>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderClients() {
+                const tbody = qs("#clients-table-body");
+                if (!state.clients.length) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="6" class="empty">Kliente pole</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = state.clients
+                    .map(
+                        (c) => `
+                <tr>
+                  <td>${c.id}</td>
+                  <td>${c.eesnimi} ${c.perenimi}</td>
+                  <td>${c.isikukood}</td>
+                  <td>${c.email}</td>
+                  <td>${c.telefon || "—"}</td>
+                  <td>${c.aktiivne ? "Aktiivne" : "Suletud"}</td>
+                </tr>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderAccounts() {
+                const grid = qs("#accounts-grid");
+                if (!state.accounts.length) {
+                    grid.innerHTML =
+                        '<div class="card"><div class="empty">Kontosid pole</div></div>';
+                    return;
+                }
+                grid.innerHTML = state.accounts
+                    .map(
+                        (a) => `
+                <div class="card">
+                  <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px;">
+                    <div>
+                      <div style="font-weight:600;">${a.nr}</div>
+                      <div class="pill">${a.tyup} — ${a.valuuta}</div>
+                    </div>
+                    <div style="font-weight:700;">${formatMoney(a.saldo)}</div>
+                  </div>
+                  <div style="color: var(--muted); font-size: 0.85rem;">Klient: ${a.klient_nimi}</div>
+                  <div style="color: var(--muted); font-size: 0.75rem; margin-top: 6px;">${a.aktiivne ? "Aktiivne" : "Suletud"}</div>
+                </div>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderLoans() {
+                const wrap = qs("#loans-list");
+                if (!state.loans.length) {
+                    wrap.innerHTML =
+                        '<div class="card"><div class="empty">Laene pole</div></div>';
+                    return;
+                }
+                wrap.innerHTML = state.loans
+                    .map(
+                        (l) => `
+                <div class="loan-card">
+                  <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                    <div>
+                      <div style="font-weight:600;">Laen #${l.id} — ${l.klient_nimi}</div>
+                      <div class="pill">${l.staatus}</div>
+                    </div>
+                    <div style="font-weight:700;">${formatMoney(l.summa)}</div>
+                  </div>
+                  <div class="grid-3">
+                    <div><div class="stat-label">Kuumaks</div><div>${formatMoney(l.kuumaks)}</div></div>
+                    <div><div class="stat-label">Jäänuk</div><div>${formatMoney(l.jaanuk)}</div></div>
+                    <div><div class="stat-label">Intress</div><div>${l.intressimaar}%</div></div>
+                  </div>
+                  <div class="table-wrap" style="margin-top: 12px;">
+                    <table>
+                      <thead><tr><th>#</th><th>Põhiosa</th><th>Intress</th><th>Kokku</th><th>Jäänuk</th><th>Makstud</th></tr></thead>
+                      <tbody>
+                        ${l.graafik
+                            .map(
+                                (g) => `
+                          <tr>
+                            <td>${g.makse_nr}</td>
+                            <td>${formatMoney(g.pohiosa)}</td>
+                            <td>${formatMoney(g.intress)}</td>
+                            <td>${formatMoney(g.kokku)}</td>
+                            <td>${formatMoney(g.jaanuk)}</td>
+                            <td>${g.makstud ? "Jah" : "Ei"}</td>
+                          </tr>
+                        `,
+                            )
+                            .join("")}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderHistory() {
+                const konto = qs("#hist-konto-filter").value;
+                const tyup = qs("#hist-type-filter").value;
+                const tbody = qs("#history-table-body");
+                const rows = state.txns.filter((t) => {
+                    const kontoOk = konto ? String(t.konto_id) === konto : true;
+                    const typeOk = tyup ? t.tyup === tyup : true;
+                    return kontoOk && typeOk;
+                });
+                if (!rows.length) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="7" class="empty">Tehinguid pole</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = rows
+                    .map(
+                        (t) => `
+                <tr>
+                  <td>${t.id}</td>
+                  <td>${t.konto_nr || t.konto_id}</td>
+                  <td>${t.tyup}</td>
+                  <td>${formatMoney(t.summa)}</td>
+                  <td>${formatMoney(t.saldo_parast)}</td>
+                  <td>${t.kirjeldus || "—"}</td>
+                  <td>${formatDate(t.kuupaev)}</td>
+                </tr>
+              `,
+                    )
+                    .join("");
+            }
+
+            function renderSqlLog() {
+                const wrap = qs("#sql-log-list");
+                qs("#sql-log-count").textContent =
+                    `${state.sqlLog.length} lauset`;
+                if (!state.sqlLog.length) {
+                    wrap.innerHTML = '<div class="empty">Logi tühi</div>';
+                    return;
+                }
+                wrap.innerHTML = state.sqlLog
+                    .map(
+                        (l) => `
+                <div class="sql-panel" style="margin-bottom: 12px;">
+                  <div class="sql-header"><span>${l.silt}</span><span>${formatDate(l.aeg)}</span></div>
+                  <div class="sql-code">${l.sql_tekst}</div>
+                </div>
+              `,
+                    )
+                    .join("");
+            }
+
+            function fillSelect(select, items, labelFn, valueFn, emptyLabel) {
+                select.innerHTML = "";
+                if (emptyLabel) {
+                    const opt = document.createElement("option");
+                    opt.value = "";
+                    opt.textContent = emptyLabel;
+                    select.appendChild(opt);
+                }
+                items.forEach((item) => {
+                    const opt = document.createElement("option");
+                    opt.value = valueFn(item);
+                    opt.textContent = labelFn(item);
+                    select.appendChild(opt);
+                });
+            }
+
+            function toggleNewClientFields() {
+                const wrapper = qs("#aa-new-client");
+                if (!wrapper) return;
+                wrapper.style.display =
+                    qs("#aa-klient").value === "__new__" ? "block" : "none";
+            }
+
+            function updateSelects() {
+                const klientSelect = qs("#aa-klient");
+                klientSelect.innerHTML = "";
+                const optEmpty = document.createElement("option");
+                optEmpty.value = "";
+                optEmpty.textContent = "Vali klient";
+                klientSelect.appendChild(optEmpty);
+                const optNew = document.createElement("option");
+                optNew.value = "__new__";
+                optNew.textContent = "Lisa uus klient€¦";
+                klientSelect.appendChild(optNew);
+                state.clients.forEach((c) => {
+                    const opt = document.createElement("option");
+                    opt.value = c.id;
+                    opt.textContent = `${c.eesnimi} ${c.perenimi}`;
+                    klientSelect.appendChild(opt);
+                });
+                fillSelect(
+                    qs("#nl-klient"),
+                    state.clients,
+                    (c) => `${c.eesnimi} ${c.perenimi}`,
+                    (c) => c.id,
+                    "Vali klient",
+                );
+
+                const activeAccounts = state.accounts.filter((a) => a.aktiivne);
+                fillSelect(
+                    qs("#tr-from"),
+                    activeAccounts,
+                    (a) => `${a.nr} (${a.klient_nimi})`,
+                    (a) => a.id,
+                    "Vali konto",
+                );
+                fillSelect(
+                    qs("#tr-to"),
+                    activeAccounts,
+                    (a) => `${a.nr} (${a.klient_nimi})`,
+                    (a) => a.id,
+                    "Vali konto",
+                );
+                fillSelect(
+                    qs("#dep-konto"),
+                    activeAccounts,
+                    (a) => `${a.nr} (${a.klient_nimi})`,
+                    (a) => a.id,
+                    "Vali konto",
+                );
+                fillSelect(
+                    qs("#wd-konto"),
+                    activeAccounts,
+                    (a) => `${a.nr} (${a.klient_nimi})`,
+                    (a) => a.id,
+                    "Vali konto",
+                );
+                fillSelect(
+                    qs("#hist-konto-filter"),
+                    activeAccounts,
+                    (a) => `${a.nr}`,
+                    (a) => a.id,
+                    "Kõik kontod",
+                );
+                fillSelect(
+                    qs("#lp-konto"),
+                    activeAccounts.filter((a) => a.tyup === "ARVELDUS"),
+                    (a) => `${a.nr} (${a.klient_nimi})`,
+                    (a) => a.id,
+                    "Vali konto",
+                );
+
+                updateNewLoanAccountOptions();
+                updateTransferSQL();
+                updateDepositSQL();
+                updateWithdrawSQL();
+                updateLoanPaySQL();
+                updateAddAccountSQL();
+                toggleNewClientFields();
+            }
+
+            function updateAddClientSQL() {
+                const eesnimi = qs("#ac-eesnimi").value || "?";
+                const perenimi = qs("#ac-perenimi").value || "?";
+                const isik = qs("#ac-isikukood").value || "?";
+                const email = qs("#ac-email").value || "?";
+                const telefon = qs("#ac-telefon").value || "";
+                const aadress = qs("#ac-aadress").value || "";
+                qs("#add-client-sql-code").textContent =
+                    `EXEC dbo.sp_LisaKlient @Eesnimi='${eesnimi}', @Perenimi='${perenimi}', @Isikukood='${isik}', @Email='${email}', @Telefon='${telefon}', @Aadress='${aadress}', @KlientID=@out OUTPUT;`;
+            }
+
+            function updateAddAccountSQL() {
+                const klient = qs("#aa-klient").value || "?";
+                const klientVal = klient === "__new__" ? "NEW_KLIENT" : klient;
+                const tyup = qs("#aa-type").value || "ARVELDUS";
+                const valuuta = qs("#aa-currency").value || "EUR";
+                qs("#add-account-sql-code").textContent =
+                    `EXEC dbo.sp_AvaKonto @KlientID=${klientVal}, @KontoTüüp='${tyup}', @Valuuta='${valuuta}', @KontoID=@out OUTPUT;`;
+            }
+
+            function updateTransferSQL() {
+                const from = qs("#tr-from").value || "?";
+                const to = qs("#tr-to").value || "?";
+                const summa = qs("#tr-summa").value || "?";
+                const selgitus = qs("#tr-selgitus").value || "";
+                qs("#transfer-sql-code").textContent =
+                    `BEGIN TRANSACTION;\n  EXEC dbo.sp_TeostÜlekan @SaatjaKontoID=${from}, @SaajaKontoID=${to}, @Summa=${summa}, @Selgitus='${selgitus}';\nCOMMIT;`;
+            }
+
+            function updateDepositSQL() {
+                const konto = qs("#dep-konto").value || "?";
+                const summa = qs("#dep-summa").value || "?";
+                const kirjeldus = qs("#dep-kirjeldus").value || "Sissemaks";
+                qs("#deposit-sql-code").textContent =
+                    `EXEC dbo.sp_Sissemaks @KontoID=${konto}, @Summa=${summa}, @Kirjeldus='${kirjeldus}';`;
+            }
+
+            function updateWithdrawSQL() {
+                const konto = qs("#wd-konto").value || "?";
+                const summa = qs("#wd-summa").value || "?";
+                const kirjeldus = qs("#wd-kirjeldus").value || "Väljavõtt";
+                qs("#withdraw-sql-code").textContent =
+                    `EXEC dbo.sp_Väljavõtt @KontoID=${konto}, @Summa=${summa}, @Kirjeldus='${kirjeldus}';`;
+            }
+
+            function updateNewLoanAccountOptions() {
+                const klientId = Number(qs("#nl-klient").value);
+                const options = state.accounts.filter(
+                    (a) =>
+                        a.klient_id === klientId &&
+                        a.tyup === "ARVELDUS" &&
+                        a.aktiivne,
+                );
+                fillSelect(
+                    qs("#nl-konto"),
+                    options,
+                    (a) => `${a.nr}`,
+                    (a) => a.id,
+                    options.length ? null : "—",
+                );
+                calcLoan();
+            }
+
+            function calcLoan() {
+                const summa = Number(qs("#nl-summa").value || 0);
+                const intress = Number(qs("#nl-intress").value || 0);
+                const kuud = Number(qs("#nl-tahtaeg").value || 0);
+                const preview = qs("#loan-preview");
+                if (!summa || !kuud) {
+                    preview.style.display = "none";
+                    qs("#loan-schedule-preview").innerHTML =
+                        '<tr><td colspan="5" class="empty">Täida vorm eelvaate jaoks</td></tr>';
+                    qs("#new-loan-sql").textContent = "-- Täida vorm";
+                    return;
+                }
+                const r = intress / 100 / 12;
+                const kuumaks =
+                    r === 0
+                        ? summa / kuud
+                        : (summa * r) / (1 - Math.pow(1 + r, -kuud));
+                qs("#loan-monthly").textContent = formatMoney(kuumaks);
+                preview.style.display = "block";
+
+                qs("#new-loan-sql").textContent =
+                    `EXEC dbo.sp_VäljastLaen @KlientID=${
+                        qs("#nl-klient").value || "?"
+                    }, @ArveldusKontoID=${
+                        qs("#nl-konto").value || "?"
+                    }, @Summa=${summa.toFixed(2)}, @IntressimäärA=${(
+                        intress / 100
+                    ).toFixed(
+                        4,
+                    )}, @TähtaegKuudes=${kuud}, @LaenID=@out OUTPUT;`;
+
+                let bal = summa;
+                const rows = [];
+                for (let i = 1; i <= Math.min(kuud, 6); i++) {
+                    const intressOsa = r === 0 ? 0 : +(bal * r).toFixed(2);
+                    const pohiosa =
+                        i === kuud ? bal : +(kuumaks - intressOsa).toFixed(2);
+                    const kokku = +(pohiosa + intressOsa).toFixed(2);
+                    bal = +(bal - pohiosa).toFixed(2);
+                    rows.push(
+                        `<tr><td>${i}</td><td>${formatMoney(
+                            pohiosa,
+                        )}</td><td>${formatMoney(
+                            intressOsa,
+                        )}</td><td>${formatMoney(kokku)}</td><td>${formatMoney(
+                            Math.max(0, bal),
+                        )}</td></tr>`,
+                    );
+                }
+                qs("#loan-schedule-preview").innerHTML = rows.join("");
+            }
+
+            function updateLoanPaySQL() {
+                const laen = qs("#lp-laen").value || "?";
+                const konto = qs("#lp-konto").value || "?";
+                qs("#loan-pay-sql").textContent =
+                    `EXEC dbo.sp_MaksaLaenMaks @LaenID=${laen}, @ArvelduKontoID=${konto};`;
+                const selected = state.loans.find(
+                    (l) => String(l.id) === String(laen),
+                );
+                if (selected) {
+                    const next = selected.graafik.find((g) => !g.makstud);
+                    qs("#lp-info").textContent = next
+                        ? `Järgmine makse: ${formatMoney(next.kokku)} (maks nr ${next.makse_nr})`
+                        : "Kõik maksed tasutud";
+                } else {
+                    qs("#lp-info").textContent = "—";
+                }
+            }
+
+            async function loadAll() {
+                try {
+                    const results = await Promise.allSettled([
+                        apiGet("/api/statistika"),
+                        apiGet("/api/kliendid"),
+                        apiGet("/api/kontod"),
+                        apiGet("/api/tehingud"),
+                        apiGet("/api/laenud"),
+                        apiGet("/api/sql-logi"),
+                    ]);
+                    const [stats, clients, accounts, txns, loans, sqlLog] =
+                        results.map((r) =>
+                            r.status === "fulfilled" ? r.value : null,
+                        );
+                    if (clients) state.clients = clients;
+                    if (accounts) state.accounts = accounts;
+                    if (txns) state.txns = txns;
+                    if (loans) state.loans = loans;
+                    if (sqlLog) state.sqlLog = sqlLog;
+                    if (stats) renderStats(stats);
+                    renderRecentTxns();
+                    renderAccountMini();
+                    renderClients();
+                    renderAccounts();
+                    renderHistory();
+                    renderLoans();
+                    renderSqlLog();
+                    updateSelects();
+                    fillSelect(
+                        qs("#lp-laen"),
+                        state.loans.filter((l) => l.staatus === "AKTIIVNE"),
+                        (l) => `#${l.id} — ${l.klient_nimi}`,
+                        (l) => l.id,
+                        "Vali laen",
+                    );
+                } catch (err) {
+                    showToast("Andmete laadimine ebaõnnestus", "error");
+                }
+            }
+
+            async function addClient() {
+                const payload = {
+                    eesnimi: qs("#ac-eesnimi").value.trim(),
+                    perenimi: qs("#ac-perenimi").value.trim(),
+                    isikukood: qs("#ac-isikukood").value.trim(),
+                    email: qs("#ac-email").value.trim(),
+                    telefon: qs("#ac-telefon").value.trim(),
+                    aadress: qs("#ac-aadress").value.trim(),
+                };
+                try {
+                    await apiPost("/api/kliendid", payload);
+                    showToast("Klient lisatud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Klienti ei lisatud", "error");
+                }
+            }
+
+            async function addAccount() {
+                try {
+                    const klientValue = qs("#aa-klient").value;
+                    if (!klientValue) {
+                        showToast("Vali klient", "error");
+                        return;
+                    }
+
+                    let klientId = Number(klientValue);
+                    if (klientValue === "__new__") {
+                        const newClient = {
+                            eesnimi: qs("#aa-eesnimi").value.trim(),
+                            perenimi: qs("#aa-perenimi").value.trim(),
+                            isikukood: qs("#aa-isikukood").value.trim(),
+                            email: qs("#aa-email").value.trim(),
+                            telefon: qs("#aa-telefon").value.trim(),
+                            aadress: qs("#aa-aadress").value.trim(),
+                        };
+                        if (
+                            !newClient.eesnimi ||
+                            !newClient.perenimi ||
+                            !newClient.isikukood ||
+                            !newClient.email
+                        ) {
+                            showToast(
+                                "Täida kliendi kohustuslikud väljad",
+                                "error",
+                            );
+                            return;
+                        }
+                        const created = await apiPost(
+                            "/api/kliendid",
+                            newClient,
+                        );
+                        klientId = created.id;
+                    }
+
+                    const payload = {
+                        klient_id: klientId,
+                        tyup: qs("#aa-type").value,
+                        valuuta: qs("#aa-currency").value,
+                    };
+                    await apiPost("/api/kontod", payload);
+                    showToast("Konto avatud");
+                    try {
+                        const accounts = await apiGet("/api/kontod");
+                        state.accounts = accounts;
+                        renderAccounts();
+                        renderAccountMini();
+                        updateSelects();
+                    } catch (err) {
+                        await loadAll();
+                    }
+                    setActivePage("accounts");
+                } catch (err) {
+                    showToast("Konto avamine ebaõnnestus", "error");
+                }
+            }
+
+            async function doTransfer() {
+                const payload = {
+                    saatja_id: Number(qs("#tr-from").value),
+                    saaja_id: Number(qs("#tr-to").value),
+                    summa: Number(qs("#tr-summa").value),
+                    selgitus: qs("#tr-selgitus").value.trim(),
+                };
+                try {
+                    await apiPost("/api/ylekan", payload);
+                    showToast("Ülekanne teostatud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Ülekanne ebaõnnestus", "error");
+                }
+            }
+
+            async function doDeposit() {
+                const payload = {
+                    konto_id: Number(qs("#dep-konto").value),
+                    summa: Number(qs("#dep-summa").value),
+                    kirjeldus: qs("#dep-kirjeldus").value.trim(),
+                };
+                try {
+                    await apiPost("/api/sissemaks", payload);
+                    showToast("Sissemaks tehtud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Sissemaks ebaõnnestus", "error");
+                }
+            }
+
+            async function doWithdraw() {
+                const payload = {
+                    konto_id: Number(qs("#wd-konto").value),
+                    summa: Number(qs("#wd-summa").value),
+                    kirjeldus: qs("#wd-kirjeldus").value.trim(),
+                };
+                try {
+                    await apiPost("/api/valjavaott", payload);
+                    showToast("Väljavõtt tehtud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Väljavõtt ebaõnnestus", "error");
+                }
+            }
+
+            async function doNewLoan() {
+                const payload = {
+                    klient_id: Number(qs("#nl-klient").value),
+                    konto_id: Number(qs("#nl-konto").value),
+                    summa: Number(qs("#nl-summa").value),
+                    intress: Number(qs("#nl-intress").value),
+                    kuud: Number(qs("#nl-tahtaeg").value),
+                };
+                try {
+                    await apiPost("/api/laenud", payload);
+                    showToast("Laen väljastatud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Laenu väljastamine ebaõnnestus", "error");
+                }
+            }
+
+            async function doLoanPayment() {
+                const laenId = Number(qs("#lp-laen").value);
+                const payload = { konto_id: Number(qs("#lp-konto").value) };
+                try {
+                    await apiPost(`/api/laenud/${laenId}/maks`, payload);
+                    showToast("Makse tehtud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("Makse ebaõnnestus", "error");
+                }
+            }
+
+            async function clearSQL() {
+                try {
+                    await apiDelete("/api/sql-logi");
+                    showToast("SQL logi tühjendatud");
+                    await loadAll();
+                } catch (err) {
+                    showToast("SQL logi tühjendamine ebaõnnestus", "error");
+                }
+            }
+
+            function bindActions() {
+                qs("#btn-add-client").addEventListener("click", addClient);
+                qs("#btn-add-account").addEventListener("click", addAccount);
+                qs("#btn-transfer").addEventListener("click", doTransfer);
+                qs("#btn-deposit").addEventListener("click", doDeposit);
+                qs("#btn-withdraw").addEventListener("click", doWithdraw);
+                qs("#btn-new-loan").addEventListener("click", doNewLoan);
+                qs("#btn-loan-pay").addEventListener("click", doLoanPayment);
+                qs("#btn-clear-sql").addEventListener("click", clearSQL);
+
+                [
+                    "#ac-eesnimi",
+                    "#ac-perenimi",
+                    "#ac-isikukood",
+                    "#ac-email",
+                    "#ac-telefon",
+                    "#ac-aadress",
+                ].forEach((id) => {
+                    qs(id).addEventListener("input", updateAddClientSQL);
+                });
+                ["#aa-klient", "#aa-type", "#aa-currency"].forEach((id) => {
+                    qs(id).addEventListener("change", () => {
+                        updateAddAccountSQL();
+                        toggleNewClientFields();
+                    });
+                });
+                ["#tr-from", "#tr-to", "#tr-summa", "#tr-selgitus"].forEach(
+                    (id) => {
+                        qs(id).addEventListener("input", updateTransferSQL);
+                    },
+                );
+                ["#dep-konto", "#dep-summa", "#dep-kirjeldus"].forEach((id) => {
+                    qs(id).addEventListener("input", updateDepositSQL);
+                });
+                ["#wd-konto", "#wd-summa", "#wd-kirjeldus"].forEach((id) => {
+                    qs(id).addEventListener("input", updateWithdrawSQL);
+                });
+                ["#nl-klient", "#nl-konto"].forEach((id) => {
+                    qs(id).addEventListener("change", () => {
+                        updateNewLoanAccountOptions();
+                        calcLoan();
+                    });
+                });
+                ["#nl-summa", "#nl-intress", "#nl-tahtaeg"].forEach((id) => {
+                    qs(id).addEventListener("input", calcLoan);
+                });
+                qs("#hist-konto-filter").addEventListener(
+                    "change",
+                    renderHistory,
+                );
+                qs("#hist-type-filter").addEventListener(
+                    "change",
+                    renderHistory,
+                );
+                qs("#lp-laen").addEventListener("change", updateLoanPaySQL);
+                qs("#lp-konto").addEventListener("change", updateLoanPaySQL);
+            }
+
+            async function init() {
+                bindNav();
+                bindActions();
+                updateAddClientSQL();
+                await loadAll();
+            }
+
+            window.addEventListener("DOMContentLoaded", init);
+        </script>
+    </body>
+</html>
+
