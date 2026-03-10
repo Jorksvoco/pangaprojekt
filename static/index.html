@@ -554,7 +554,7 @@
                 <main class="content">
                     <section id="page-dashboard" class="page active">
                         <div class="page-title">Dashboard</div>
-                        <div class="page-sub">Panga süsteemi ülevaade</div>
+                        <div class="page-sub">Panga süsteemi Ülevaade</div>
                         <div class="grid-4" id="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-label">Kliente</div>
@@ -843,7 +843,7 @@
                                         class="sql-code"
                                         id="add-account-sql-code"
                                     >
-                                        EXEC dbo.sp_AvaKonto @KlientID=?,
+                                        EXEC dbo.sp_AvaKonto @KlientID=,
                                         @KontoTüüp='ARVELDUS', @Valuuta='EUR',
                                         @KontoID=@out OUTPUT;
                                     </div>
@@ -878,7 +878,7 @@
                                     ></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Summa (‚¬)</label>
+                                    <label class="form-label">Summa (€)</label>
                                     <input
                                         class="form-input"
                                         id="tr-summa"
@@ -900,7 +900,7 @@
                                     class="btn btn-primary"
                                     id="btn-transfer"
                                 >
-                                    Teosta ülekanne
+                                    Teosta Ülekanne
                                 </button>
                             </div>
                             <div class="card">
@@ -934,7 +934,7 @@
                                     ></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Summa (‚¬)</label>
+                                    <label class="form-label">Summa (€)</label>
                                     <input
                                         class="form-input"
                                         id="dep-summa"
@@ -986,7 +986,7 @@
                                     ></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Summa (‚¬)</label>
+                                    <label class="form-label">Summa (€)</label>
                                     <input
                                         class="form-input"
                                         id="wd-summa"
@@ -1113,7 +1113,7 @@
                                     ></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Summa (‚¬)</label>
+                                    <label class="form-label">Summa (€)</label>
                                     <input
                                         class="form-input"
                                         id="nl-summa"
@@ -1351,7 +1351,7 @@
 
             function formatMoney(value) {
                 const n = Number(value || 0);
-                return `${n.toFixed(2)} ‚¬`;
+                return `${n.toFixed(2)} \u20AC`;
             }
 
             function formatDate(value) {
@@ -1620,7 +1620,7 @@
                 klientSelect.appendChild(optEmpty);
                 const optNew = document.createElement("option");
                 optNew.value = "__new__";
-                optNew.textContent = "Lisa uus klient€¦";
+                optNew.textContent = "Lisa uus klient...";
                 klientSelect.appendChild(optNew);
                 state.clients.forEach((c) => {
                     const opt = document.createElement("option");
@@ -1690,10 +1690,10 @@
             }
 
             function updateAddClientSQL() {
-                const eesnimi = qs("#ac-eesnimi").value || "?";
-                const perenimi = qs("#ac-perenimi").value || "?";
-                const isik = qs("#ac-isikukood").value || "?";
-                const email = qs("#ac-email").value || "?";
+                const eesnimi = qs("#ac-eesnimi").value || "";
+                const perenimi = qs("#ac-perenimi").value || "";
+                const isik = qs("#ac-isikukood").value || "";
+                const email = qs("#ac-email").value || "";
                 const telefon = qs("#ac-telefon").value || "";
                 const aadress = qs("#ac-aadress").value || "";
                 qs("#add-client-sql-code").textContent =
@@ -1701,7 +1701,7 @@
             }
 
             function updateAddAccountSQL() {
-                const klient = qs("#aa-klient").value || "?";
+                const klient = qs("#aa-klient").value || "";
                 const klientVal = klient === "__new__" ? "NEW_KLIENT" : klient;
                 const tyup = qs("#aa-type").value || "ARVELDUS";
                 const valuuta = qs("#aa-currency").value || "EUR";
@@ -1710,25 +1710,25 @@
             }
 
             function updateTransferSQL() {
-                const from = qs("#tr-from").value || "?";
-                const to = qs("#tr-to").value || "?";
-                const summa = qs("#tr-summa").value || "?";
+                const from = qs("#tr-from").value || "";
+                const to = qs("#tr-to").value || "";
+                const summa = qs("#tr-summa").value || "";
                 const selgitus = qs("#tr-selgitus").value || "";
                 qs("#transfer-sql-code").textContent =
                     `BEGIN TRANSACTION;\n  EXEC dbo.sp_TeostÜlekan @SaatjaKontoID=${from}, @SaajaKontoID=${to}, @Summa=${summa}, @Selgitus='${selgitus}';\nCOMMIT;`;
             }
 
             function updateDepositSQL() {
-                const konto = qs("#dep-konto").value || "?";
-                const summa = qs("#dep-summa").value || "?";
+                const konto = qs("#dep-konto").value || "";
+                const summa = qs("#dep-summa").value || "";
                 const kirjeldus = qs("#dep-kirjeldus").value || "Sissemaks";
                 qs("#deposit-sql-code").textContent =
                     `EXEC dbo.sp_Sissemaks @KontoID=${konto}, @Summa=${summa}, @Kirjeldus='${kirjeldus}';`;
             }
 
             function updateWithdrawSQL() {
-                const konto = qs("#wd-konto").value || "?";
-                const summa = qs("#wd-summa").value || "?";
+                const konto = qs("#wd-konto").value || "";
+                const summa = qs("#wd-summa").value || "";
                 const kirjeldus = qs("#wd-kirjeldus").value || "Väljavõtt";
                 qs("#withdraw-sql-code").textContent =
                     `EXEC dbo.sp_Väljavõtt @KontoID=${konto}, @Summa=${summa}, @Kirjeldus='${kirjeldus}';`;
@@ -1774,9 +1774,9 @@
 
                 qs("#new-loan-sql").textContent =
                     `EXEC dbo.sp_VäljastLaen @KlientID=${
-                        qs("#nl-klient").value || "?"
+                        qs("#nl-klient").value || ""
                     }, @ArveldusKontoID=${
-                        qs("#nl-konto").value || "?"
+                        qs("#nl-konto").value || ""
                     }, @Summa=${summa.toFixed(2)}, @IntressimäärA=${(
                         intress / 100
                     ).toFixed(
@@ -1805,8 +1805,8 @@
             }
 
             function updateLoanPaySQL() {
-                const laen = qs("#lp-laen").value || "?";
-                const konto = qs("#lp-konto").value || "?";
+                const laen = qs("#lp-laen").value || "";
+                const konto = qs("#lp-konto").value || "";
                 qs("#loan-pay-sql").textContent =
                     `EXEC dbo.sp_MaksaLaenMaks @LaenID=${laen}, @ArvelduKontoID=${konto};`;
                 const selected = state.loans.find(
@@ -2093,4 +2093,5 @@
         </script>
     </body>
 </html>
+
 
